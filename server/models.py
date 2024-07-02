@@ -2,6 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData
 from sqlalchemy_serializer import SerializerMixin
 from sqlalchemy.orm import validates
+from sqlalchemy.ext.associationproxy import association_proxy
 
 metadata = MetaData(
     naming_convention={
@@ -20,15 +21,9 @@ class Restaurant(db.Model, SerializerMixin):
     address = db.Column(db.String)
 
     restaurant_pizzas = db.relationship('RestaurantPizza', back_populates='restaurant', cascade='all, delete-orphan')
+    pizzas = association_proxy('restaurant_pizzas', 'pizza')
 
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "address": self.address,
-            "restaurant_pizzas": [rp.to_dict() for rp in self.restaurant_pizzas]
-        }
 
     def __repr__(self):
         return f"<Restaurant {self.name}>"
@@ -42,14 +37,9 @@ class Pizza(db.Model, SerializerMixin):
     ingredients = db.Column(db.String)
 
     restaurant_pizzas = db.relationship('RestaurantPizza', back_populates='pizza', cascade='all, delete-orphan')
+    restaurants = association_proxy('restaurant_pizzas', 'restaurant')
+    
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "ingredients": self.ingredients,
-            "restaurant_pizzas": [rp.to_dict() for rp in self.restaurant_pizzas]
-        }
 
     def __repr__(self):
         return f"<Pizza {self.name}, {self.ingredients}>"
@@ -65,15 +55,7 @@ class RestaurantPizza(db.Model, SerializerMixin):
     pizza = db.relationship('Pizza', back_populates='restaurant_pizzas')
     restaurant = db.relationship('Restaurant', back_populates='restaurant_pizzas')
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "price": self.price,
-            "pizza_id": self.pizza_id,
-            "restaurant_id": self.restaurant_id,
-            "pizza": self.pizza.to_dict(),
-            "restaurant": self.restaurant.to_dict()
-        }
+
 
     @validates('price')
     def validate_price(self, key, price):
