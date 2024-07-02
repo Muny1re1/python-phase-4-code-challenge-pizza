@@ -20,7 +20,7 @@ class Restaurant(db.Model, SerializerMixin):
     name = db.Column(db.String)
     address = db.Column(db.String)
 
-    restaurant_pizzas = db.relationship('RestaurantPizza', back_populates ='restaurant', cascade = 'all, delete-orphan')
+    restaurant_pizzas = db.relationship('RestaurantPizza', back_populates='restaurant', cascade = 'all, delete-orphan')
 
     def to_dict(self):
         return {
@@ -41,7 +41,7 @@ class Pizza(db.Model, SerializerMixin):
     name = db.Column(db.String)
     ingredients = db.Column(db.String)
 
-    restaurant_pizzas = db.relationship('RestaurantPizza', back_populates ='pizza', cascade = 'all, delete-orphan')
+    restaurant_pizzas = db.relationship('RestaurantPizza', back_populates='pizza', cascade='all, delete-orphan')
 
     def to_dict(self):
         return {
@@ -62,8 +62,8 @@ class RestaurantPizza(db.Model):
     price = db.Column(db.Integer, nullable=False)
     pizza_id = db.Column(db.Integer, db.ForeignKey('pizzas.id'), nullable=False)
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurants.id'), nullable=False)
-    pizza = db.relationship('Pizza')
-    restaurant = db.relationship('Restaurant')
+    pizza = db.relationship('Pizza', back_populates='restaurant_pizzas')
+    restaurant = db.relationship('Restaurant', back_populates='restaurant_pizzas')
     
     def to_dict(self):
         return {
@@ -77,7 +77,7 @@ class RestaurantPizza(db.Model):
 
     @staticmethod
     def validate_price(price):
-        if not 1 <= price <= 30:
+        if (1 > price or 30 < price):
             raise ValueError("Price should be between 1 and 30")
         return price
 

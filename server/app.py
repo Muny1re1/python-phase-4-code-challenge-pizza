@@ -21,12 +21,9 @@ api = Api(app)
 
 class RestaurantList(Resource):
     def get(self):
-        try:
-            restaurants = Restaurant.query.all()
-            result = jsonify([restaurant.to_dict(only=('id', 'name', 'address')) for restaurant in restaurants])
-            return make_response(result, 200)
-        except Exception as e:
-            return make_response(jsonify({"error": str(e)}), 500)
+        restaurants = Restaurant.query.all()
+        result = jsonify([restaurant.to_dict(only=('id', 'name', 'address')) for restaurant in restaurants])
+        return make_response(result, 200)
 
 class RestaurantDetail(Resource):
     def get(self, id):
